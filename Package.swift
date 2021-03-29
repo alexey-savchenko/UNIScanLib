@@ -4,25 +4,20 @@
 import PackageDescription
 
 let package = Package(
-    name: "UNIScanLib",
-    products: [
-        // Products define the executables and libraries a package produces, and make them visible to other packages.
-        .library(
-            name: "UNIScanLib",
-            targets: ["UNIScanLib"]),
-    ],
-    dependencies: [
-        // Dependencies declare other packages that this package depends on.
-        // .package(url: /* package url */, from: "1.0.0"),
-    ],
-    targets: [
-        // Targets are the basic building blocks of a package. A target can define a module or a test suite.
-        // Targets can depend on other targets in this package, and on products in packages this package depends on.
-        .target(
-            name: "UNIScanLib",
-            dependencies: []),
-        .testTarget(
-            name: "UNIScanLibTests",
-            dependencies: ["UNIScanLib"]),
-    ]
+  name: "UNIScanLib",
+  platforms: [
+    .iOS(.v12),
+    .macOS(SupportedPlatform.MacOSVersion.v10_15)
+  ],
+  products: [
+    .library(
+      name: "UNIScanLib",
+      targets: ["UNIScanLib"]),
+  ],
+  dependencies: [],
+  targets: [
+    .target(
+      name: "UNIScanLib",
+      dependencies: []),
+  ]
 )
