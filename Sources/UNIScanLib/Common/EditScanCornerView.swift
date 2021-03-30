@@ -10,34 +10,33 @@ import UIKit
 
 /// A UIView used by corners of a quadrilateral that is aware of its position.
 final class EditScanCornerView: UIView {
-  
   let position: CornerPosition
   private let circleView = UIView()
-  
+
   init(frame: CGRect, position: CornerPosition) {
     self.position = position
     super.init(frame: frame)
-    
+
     backgroundColor = UIColor.clear
     clipsToBounds = true
   }
-  
+
   override var frame: CGRect {
     didSet {
       configureCircleView()
     }
   }
-  
+
   required init?(coder aDecoder: NSCoder) {
     fatalError("init(coder:) has not been implemented")
   }
-  
+
   override func layoutSubviews() {
     super.layoutSubviews()
-    
+
     circleView.layer.cornerRadius = circleView.frame.width / 2.0
   }
-  
+
   private func configureCircleView() {
     circleView.frame.size = CGSize(
       width: bounds.width / 2,
@@ -56,34 +55,33 @@ final class EditScanCornerView: UIView {
 
 /// A UIView used by edges of a quadrilateral that is aware of its position.
 final class EditScanEdgeView: UIView {
-  
   let position: EdgePosition
   private let circleView = UIView()
-  
+
   init(frame: CGRect, position: EdgePosition) {
     self.position = position
     super.init(frame: frame)
-    
+
     backgroundColor = UIColor.clear
     clipsToBounds = true
   }
-  
+
   override var frame: CGRect {
     didSet {
       configureCircleView()
     }
   }
-  
+
   required init?(coder aDecoder: NSCoder) {
     fatalError("init(coder:) has not been implemented")
   }
-  
+
   override func layoutSubviews() {
     super.layoutSubviews()
-    
+
     circleView.layer.cornerRadius = circleView.frame.width / 2.0
   }
-  
+
   private func configureCircleView() {
     circleView.frame.size = CGSize(
       width: bounds.width / 2,

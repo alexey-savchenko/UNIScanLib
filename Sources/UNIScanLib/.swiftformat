@@ -1,0 +1,7 @@
+--rules indent,anyObjectProtocol,blankLinesAtEndOfScope,blankLinesAtStartOfScope,blankLinesBetweenScopes,braces,consecutiveBlankLines,consecutiveSpaces,duplicateImports,elseOnSameLine,emptyBraces,linebreakAtEndOfFile,modifierOrder,redundantBreak,redundantExtensionACL,redundantFileprivate,redundantGet,redundantInit,redundantLet,redundantLetError,redundantObjc,redundantParens,redundantReturn,redundantVoidReturnType,semicolons,spaceAroundBraces,spaceAroundBrackets,spaceAroundComments,spaceAroundGenerics,spaceAroundOperators,spaceAroundParens,spaceInsideBraces,spaceInsideBrackets,spaceInsideComments,spaceInsideGenerics,spaceInsideParens,trailingSpace,typeSugar,void,wrapEnumCases,yodaConditions,wrapArguments,wrap
+--indent 2
+--maxwidth 100
+--wrapparameters before-first
+--wraparguments before-first
+--wrapcollections before-first
+--exclude Generated

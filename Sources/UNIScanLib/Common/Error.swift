@@ -18,7 +18,7 @@ public enum ImageScannerError: LocalizedError {
   case capture
   /// Error when creating the CIImage.
   case ciImageCreation
-  
+
   var errorDescription: String {
     switch self {
     case .authorization:

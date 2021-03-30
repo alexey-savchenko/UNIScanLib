@@ -14,10 +14,13 @@ let package = Package(
       name: "UNIScanLib",
       targets: ["UNIScanLib"]),
   ],
-  dependencies: [],
+  dependencies: [
+    .package(url: "https://github.com/alexey-savchenko/UNILib.git", Package.Dependency.Requirement.branch("main"))],
   targets: [
     .target(
       name: "UNIScanLib",
-      dependencies: []),
+      dependencies: [
+        .product(name: "UNILibCore", package: "UNILib")
+      ]),
   ]
 )
