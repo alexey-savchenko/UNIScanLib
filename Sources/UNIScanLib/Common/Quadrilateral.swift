@@ -12,6 +12,22 @@ import Vision
 import CoreImage
 import UNILibCore
 
+/// Simple enum to keep track of the position of the corners of a quadrilateral.
+public enum CornerPosition {
+  case topLeft
+  case topRight
+  case bottomRight
+  case bottomLeft
+}
+
+/// Simple enum to keep track of the position of the edges of a quadrilateral.
+public enum EdgePosition {
+  case top
+  case bottom
+  case left
+  case right
+}
+
 /// A data structure representing a quadrilateral and its position. This class exists to bypass the fact that CIRectangleFeature is read-only.
 public struct Quadrilateral: Codable, Transformable {
   /// A point that specifies the top left corner of the quadrilateral.
