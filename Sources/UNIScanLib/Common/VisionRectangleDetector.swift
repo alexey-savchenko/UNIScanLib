@@ -68,7 +68,27 @@ enum VisionRectangleDetector {
     forPixelBuffer pixelBuffer: CVPixelBuffer,
     completion: @escaping ((Quadrilateral?) -> Void)
   ) {
-    let imageRequestHandler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, options: [:])
+    let ciImage = CIImage(cvPixelBuffer: pixelBuffer)
+    
+    let filteredImage = ciImage
+      .applyingFilter("CIMorphologyGradient", parameters: ["inputRadius": 1.5])
+    
+    var newPixelBuffer: CVPixelBuffer?
+    CVPixelBufferCreate(
+      kCFAllocatorDefault,
+      CVPixelBufferGetWidth(pixelBuffer),
+      CVPixelBufferGetHeight(pixelBuffer),
+      kCVPixelFormatType_32ARGB,
+      nil,
+      &newPixelBuffer
+    )
+    
+    guard let filteredPixelBuffer = newPixelBuffer else { completion(nil); return }
+    
+    let context = CIContext()
+    context.render(filteredImage, to: filteredPixelBuffer)
+    
+    let imageRequestHandler = VNImageRequestHandler(cvPixelBuffer: filteredPixelBuffer, options: [:])
     VisionRectangleDetector.completeImageRequest(
       for: imageRequestHandler,
       width: CGFloat(CVPixelBufferGetWidth(pixelBuffer)),
