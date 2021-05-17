@@ -277,7 +277,17 @@ public final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSamp
 
     autoreleasepool {
       VisionRectangleDetector.rectangle(forPixelBuffer: pixelBuffer) { [weak self] rectangle in
-        self?.processRectangle(rectangle: rectangle, imageSize: imageSize)
+        var scaledQuad = rectangle
+        scaledQuad?.topLeft.x += 15
+        scaledQuad?.topLeft.y -= 15
+        scaledQuad?.topRight.x -= 15
+        scaledQuad?.topRight.y -= 15
+        scaledQuad?.bottomLeft.x += 15
+        scaledQuad?.bottomLeft.y += 15
+        scaledQuad?.bottomRight.x -= 15
+        scaledQuad?.bottomRight.y += 15
+        
+        self?.processRectangle(rectangle: scaledQuad, imageSize: imageSize)
       }
 
       let image = CIImage(cvImageBuffer: pixelBuffer)
