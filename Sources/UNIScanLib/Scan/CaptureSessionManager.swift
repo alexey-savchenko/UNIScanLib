@@ -62,12 +62,22 @@ public protocol RectangleDetectionDelegateProtocol: NSObjectProtocol {
     _ captureSessionManager: CaptureSessionManager,
     didReceiveImage image: CIImage
   )
+  
+  func captureSessionManager(
+    _ captureSessionManager: CaptureSessionManager,
+    didCaptureQRCodeTextData textData: String
+  )
 }
 
 public extension RectangleDetectionDelegateProtocol {
   func captureSessionManager(
     _ captureSessionManager: CaptureSessionManager,
     didReceiveImage image: CIImage
+  ) {}
+  
+  func captureSessionManager(
+    _ captureSessionManager: CaptureSessionManager,
+    didCaptureQRCodeTextData textData: String
   ) {}
 }
 
@@ -82,6 +92,7 @@ public final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSamp
   public weak var delegate: RectangleDetectionDelegateProtocol?
   public var displayedRectangleResult: RectangleDetectorResult?
   private var photoOutput = AVCapturePhotoOutput()
+  private var metadataOutput = AVCaptureMetadataOutput()
 
   /// Whether the CaptureSessionManager should be detecting quadrilaterals.
   private var isDetecting = true
@@ -102,6 +113,10 @@ public final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSamp
     label: "video_ouput_queue",
     qos: .userInitiated
   )
+  
+  public var shouldCaptureQR = true
+  public var qrCodeScanningActive = false
+
   // MARK: Life Cycle
 
   public init?(videoPreviewLayer: AVCaptureVideoPreviewLayer?) {
@@ -168,6 +183,8 @@ public final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSamp
         object: nil
       )
     }
+    
+    configureQRCodeSession()
   }
 
   deinit {
@@ -356,7 +373,38 @@ public final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSamp
 
     return quad
   }
+  
+  private func configureQRCodeSession() {
+    guard captureSession.canAddOutput(metadataOutput) else { return }
+    
+    captureSession.addOutput(metadataOutput)
+    
+    metadataOutput.setMetadataObjectsDelegate(self, queue: DispatchQueue.main)
+    metadataOutput.metadataObjectTypes = [.qr]
+  }
 }
+
+extension CaptureSessionManager: AVCaptureMetadataOutputObjectsDelegate {
+  public func metadataOutput(
+    _ output: AVCaptureMetadataOutput,
+    didOutput metadataObjects: [AVMetadataObject],
+    from connection: AVCaptureConnection
+  ) {
+    guard qrCodeScanningActive, shouldCaptureQR else { return }
+    
+    shouldCaptureQR = false
+    
+    if let metadataObject = metadataObjects.first,
+       let readableObject = metadataObject as? AVMetadataMachineReadableCodeObject,
+       let stringValue = readableObject.stringValue {
+      
+      delegate?.captureSessionManager(self, didCaptureQRCodeTextData: stringValue)
+    } else {
+      shouldCaptureQR = true
+    }
+  }
+}
+
 
 extension CaptureSessionManager: AVCapturePhotoCaptureDelegate {
   /*
