@@ -83,6 +83,12 @@ public extension RectangleDetectionDelegateProtocol {
 
 /// The CaptureSessionManager is responsible for setting up and managing the AVCaptureSession and the functions related to capturing.
 public final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate {
+  
+  public enum RectangleDetectionMode {
+    case old
+    case new
+  }
+  
   public var captureAreaFrame = CGRect.zero
   public var parentFrame = CGRect.zero
 
@@ -116,11 +122,16 @@ public final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSamp
   
   public var shouldCaptureQR = true
   public var qrCodeScanningActive = false
+  public let rectangleDetectionMode: RectangleDetectionMode
 
   // MARK: Life Cycle
 
-  public init?(videoPreviewLayer: AVCaptureVideoPreviewLayer?) {
+  public init?(
+    videoPreviewLayer: AVCaptureVideoPreviewLayer?,
+    rectangleDetectionMode: RectangleDetectionMode = .new
+  ) {
     self.videoPreviewLayer = videoPreviewLayer
+    self.rectangleDetectionMode = rectangleDetectionMode
     super.init()
 
     guard let device = AVCaptureDevice.default(for: AVMediaType.video) else {
@@ -293,18 +304,27 @@ public final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSamp
     )
 
     autoreleasepool {
-      VisionRectangleDetector.rectangle(forPixelBuffer: pixelBuffer) { [weak self] rectangle in
-        var scaledQuad = rectangle
-        scaledQuad?.topLeft.x += 15
-        scaledQuad?.topLeft.y -= 15
-        scaledQuad?.topRight.x -= 15
-        scaledQuad?.topRight.y -= 15
-        scaledQuad?.bottomLeft.x += 15
-        scaledQuad?.bottomLeft.y += 15
-        scaledQuad?.bottomRight.x -= 15
-        scaledQuad?.bottomRight.y += 15
-        
-        self?.processRectangle(rectangle: scaledQuad, imageSize: imageSize)
+      VisionRectangleDetector.rectangle(
+        forPixelBuffer: pixelBuffer,
+        rectangleDetectionMode: rectangleDetectionMode
+      ) { [weak self] rectangle in
+        guard let self = self else { return }
+        switch self.rectangleDetectionMode {
+        case .new:
+          var scaledQuad = rectangle
+          scaledQuad?.topLeft.x += 15
+          scaledQuad?.topLeft.y -= 15
+          scaledQuad?.topRight.x -= 15
+          scaledQuad?.topRight.y -= 15
+          scaledQuad?.bottomLeft.x += 15
+          scaledQuad?.bottomLeft.y += 15
+          scaledQuad?.bottomRight.x -= 15
+          scaledQuad?.bottomRight.y += 15
+          
+          self.processRectangle(rectangle: scaledQuad, imageSize: imageSize)
+        case .old:
+          self.processRectangle(rectangle: rectangle, imageSize: imageSize)
+        }
       }
 
       let image = CIImage(cvImageBuffer: pixelBuffer)

@@ -343,16 +343,16 @@ public extension Quadrilateral {
 }
 
 public extension Quadrilateral {
-  static func quad(
-    _ first: Quadrilateral,
-    significantlyDifferentThen second: Quadrilateral
-  ) -> Bool {
-    let _max = max(first.squreValue(), second.squreValue())
-    let _min = min(first.squreValue(), second.squreValue())
-
-    return (_max / _min) - 1.0 > 0.25
-//    return abs(first.squreValue() - second.squreValue()) >= threshold
-  }
+//  static func quad(
+//    _ first: Quadrilateral,
+//    significantlyDifferentThen second: Quadrilateral
+//  ) -> Bool {
+//    let _max = max(first.squreValue(), second.squreValue())
+//    let _min = min(first.squreValue(), second.squreValue())
+//
+//    return (_max / _min) - 1.0 > 0.25
+////    return abs(first.squreValue() - second.squreValue()) >= threshold
+//  }
 
   func squreValue() -> CGFloat {
     let a = Line(p1: topLeft, p2: topRight)
