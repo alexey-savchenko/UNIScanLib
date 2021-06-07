@@ -233,12 +233,20 @@ public final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSamp
     guard !isRunning else { return }
 
     let authorizationStatus = AVCaptureDevice.authorizationStatus(for: .video)
-
+    
     switch authorizationStatus {
     case .authorized:
       DispatchQueue.main.async {
+        let photoSettings = AVCapturePhotoSettings(format: [AVVideoCodecKey: AVVideoCodecType.jpeg])
+        photoSettings.isHighResolutionPhotoEnabled = true
+        photoSettings.isAutoStillImageStabilizationEnabled = true
+        photoOutput.isHighResolutionCaptureEnabled = true
+        photoOutput
+          .setPreparedPhotoSettingsArray([photoSettings]) { [weak self] success, error in
+            self?.isRunning = success
+          }
         self.captureSession.startRunning()
-        self.isRunning = true
+        
       }
       isDetecting = true
     case .notDetermined:
@@ -273,18 +281,18 @@ public final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSamp
       delegate?.captureSessionManager(self, didFailWithError: error)
       return
     }
-
+    
     CaptureSession.current.setImageOrientation()
-    let photoSettings = AVCapturePhotoSettings(format: [AVVideoCodecKey: AVVideoCodecType.jpeg])
-    photoSettings.isHighResolutionPhotoEnabled = true
-    photoSettings.isAutoStillImageStabilizationEnabled = true
-    photoOutput.isHighResolutionCaptureEnabled = true
-    photoOutput
-      .setPreparedPhotoSettingsArray([photoSettings]) { [weak photoOutput] success, error in
-        if success {
+//    let photoSettings = AVCapturePhotoSettings(format: [AVVideoCodecKey: AVVideoCodecType.jpeg])
+//    photoSettings.isHighResolutionPhotoEnabled = true
+//    photoSettings.isAutoStillImageStabilizationEnabled = true
+//    photoOutput.isHighResolutionCaptureEnabled = true
+//    photoOutput
+//      .setPreparedPhotoSettingsArray([photoSettings]) { [weak photoOutput] success, error in
+//        if success {
           photoOutput?.capturePhoto(with: photoSettings, delegate: self)
-        }
-      }
+//        }
+//      }
   }
 
   // MARK: - AVCaptureVideoDataOutputSampleBufferDelegate
