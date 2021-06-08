@@ -15,8 +15,8 @@
         "repositoryURL": "https://github.com/ReactiveX/RxSwift.git",
         "state": {
           "branch": null,
-          "revision": "c6c0c540109678b96639c25e9c0ebe4a6d7a69a9",
-          "version": "5.0.0"
+          "revision": "c1bd31b397d87a54467af4161dde9d6b27720c19",
+          "version": "5.1.0"
         }
       },
       {
@@ -24,7 +24,7 @@
         "repositoryURL": "https://github.com/alexey-savchenko/UNILib.git",
         "state": {
           "branch": "main",
-          "revision": "69c296d9bd059a57aef3dcb69ee5bdd90ce38d62",
+          "revision": "f20d291c371f257c40674a102690e8313da80cbc",
           "version": null
         }
       }
