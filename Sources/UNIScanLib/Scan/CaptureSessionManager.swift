@@ -123,13 +123,6 @@ public final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSamp
   public var shouldCaptureQR = true
   public var qrCodeScanningActive = false
   public let rectangleDetectionMode: RectangleDetectionMode
-  
-  var photoSettings: AVCapturePhotoSettings {
-    let photoSettings = AVCapturePhotoSettings(format: [AVVideoCodecKey: AVVideoCodecType.jpeg])
-    photoSettings.isHighResolutionPhotoEnabled = true
-    photoSettings.isAutoStillImageStabilizationEnabled = true
-    return photoSettings
-  }
 
   // MARK: Life Cycle
 
@@ -244,10 +237,12 @@ public final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSamp
     switch authorizationStatus {
     case .authorized:
       DispatchQueue.main.async {
-        
-        self.photoOutput.isHighResolutionCaptureEnabled = true
-        self.photoOutput
-          .setPreparedPhotoSettingsArray([self.photoSettings]) { [weak self] success, error in
+        let photoSettings = AVCapturePhotoSettings(format: [AVVideoCodecKey: AVVideoCodecType.jpeg])
+        photoSettings.isHighResolutionPhotoEnabled = true
+        photoSettings.isAutoStillImageStabilizationEnabled = true
+        photoOutput.isHighResolutionCaptureEnabled = true
+        photoOutput
+          .setPreparedPhotoSettingsArray([photoSettings]) { [weak self] success, error in
             self?.isRunning = success
           }
         self.captureSession.startRunning()
@@ -295,7 +290,7 @@ public final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSamp
 //    photoOutput
 //      .setPreparedPhotoSettingsArray([photoSettings]) { [weak photoOutput] success, error in
 //        if success {
-          photoOutput.capturePhoto(with: photoSettings, delegate: self)
+          photoOutput?.capturePhoto(with: photoSettings, delegate: self)
 //        }
 //      }
   }
