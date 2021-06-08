@@ -237,16 +237,8 @@ public final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSamp
     switch authorizationStatus {
     case .authorized:
       DispatchQueue.main.async {
-        let photoSettings = AVCapturePhotoSettings(format: [AVVideoCodecKey: AVVideoCodecType.jpeg])
-        photoSettings.isHighResolutionPhotoEnabled = true
-        photoSettings.isAutoStillImageStabilizationEnabled = true
-        photoOutput.isHighResolutionCaptureEnabled = true
-        photoOutput
-          .setPreparedPhotoSettingsArray([photoSettings]) { [weak self] success, error in
-            self?.isRunning = success
-          }
+        self.isRunning = true
         self.captureSession.startRunning()
-        
       }
       isDetecting = true
     case .notDetermined:
@@ -283,16 +275,16 @@ public final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSamp
     }
     
     CaptureSession.current.setImageOrientation()
-//    let photoSettings = AVCapturePhotoSettings(format: [AVVideoCodecKey: AVVideoCodecType.jpeg])
-//    photoSettings.isHighResolutionPhotoEnabled = true
-//    photoSettings.isAutoStillImageStabilizationEnabled = true
-//    photoOutput.isHighResolutionCaptureEnabled = true
-//    photoOutput
-//      .setPreparedPhotoSettingsArray([photoSettings]) { [weak photoOutput] success, error in
-//        if success {
+    let photoSettings = AVCapturePhotoSettings(format: [AVVideoCodecKey: AVVideoCodecType.jpeg])
+    photoSettings.isHighResolutionPhotoEnabled = true
+    photoSettings.isAutoStillImageStabilizationEnabled = true
+    photoOutput.isHighResolutionCaptureEnabled = true
+    photoOutput
+      .setPreparedPhotoSettingsArray([photoSettings]) { [weak photoOutput] success, error in
+        if success {
           photoOutput?.capturePhoto(with: photoSettings, delegate: self)
-//        }
-//      }
+        }
+      }
   }
 
   // MARK: - AVCaptureVideoDataOutputSampleBufferDelegate
