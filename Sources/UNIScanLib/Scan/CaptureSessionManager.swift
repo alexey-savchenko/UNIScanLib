@@ -24,18 +24,14 @@ public protocol RectangleDetectionDelegateProtocol: NSObjectProtocol {
   ///
   /// - Parameters:
   ///   - captureSessionManager: The `CaptureSessionManager` instance that started capturing a picture.
-  func didStartCapturingPicture(for captureSessionManager: CaptureSessionManager)
+  func didStartCapturingPicture()
 
   /// Called when a quadrilateral has been detected.
   /// - Parameters:
   ///   - captureSessionManager: The `CaptureSessionManager` instance that has detected a quadrilateral.
   ///   - quad: The detected quadrilateral in the coordinates of the image.
   ///   - imageSize: The size of the image the quadrilateral has been detected on.
-  func captureSessionManager(
-    _ captureSessionManager: CaptureSessionManager,
-    didDetectQuad quad: Quadrilateral?,
-    _ imageSize: CGSize
-  )
+  func captureSessionManager(didDetectQuad quad: Quadrilateral?, _ imageSize: CGSize)
 
   /// Called when a picture with or without a quadrilateral has been captured.
   ///
@@ -44,7 +40,6 @@ public protocol RectangleDetectionDelegateProtocol: NSObjectProtocol {
   ///   - picture: The picture that has been captured.
   ///   - quad: The quadrilateral that was detected in the picture's coordinates if any.
   func captureSessionManager(
-    _ captureSessionManager: CaptureSessionManager,
     didCapturePicture picture: UIImage,
     withQuad quad: Quadrilateral?
   )
@@ -54,29 +49,24 @@ public protocol RectangleDetectionDelegateProtocol: NSObjectProtocol {
   ///   - captureSessionManager: The `CaptureSessionManager` that encountered an error.
   ///   - error: The encountered error.
   func captureSessionManager(
-    _ captureSessionManager: CaptureSessionManager,
     didFailWithError error: Error
   )
 
   func captureSessionManager(
-    _ captureSessionManager: CaptureSessionManager,
     didReceiveImage image: CIImage
   )
   
   func captureSessionManager(
-    _ captureSessionManager: CaptureSessionManager,
     didCaptureQRCodeTextData textData: String
   )
 }
 
 public extension RectangleDetectionDelegateProtocol {
   func captureSessionManager(
-    _ captureSessionManager: CaptureSessionManager,
     didReceiveImage image: CIImage
   ) {}
   
   func captureSessionManager(
-    _ captureSessionManager: CaptureSessionManager,
     didCaptureQRCodeTextData textData: String
   ) {}
 }
@@ -136,7 +126,7 @@ public final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSamp
 
     guard let device = AVCaptureDevice.default(for: AVMediaType.video) else {
       let error = ImageScannerError.inputDevice
-      delegate?.captureSessionManager(self, didFailWithError: error)
+      delegate?.captureSessionManager(didFailWithError: error)
       return nil
     }
     DispatchQueue(label: "capture_session_setup").sync {
@@ -155,7 +145,7 @@ public final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSamp
             self.captureSession.canAddOutput(self.photoOutput),
             self.captureSession.canAddOutput(videoOutput) else {
         let error = ImageScannerError.inputDevice
-        self.delegate?.captureSessionManager(self, didFailWithError: error)
+        self.delegate?.captureSessionManager(didFailWithError: error)
         return
       }
 
@@ -163,7 +153,7 @@ public final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSamp
         try device.lockForConfiguration()
       } catch {
         let error = ImageScannerError.inputDevice
-        self.delegate?.captureSessionManager(self, didFailWithError: error)
+        self.delegate?.captureSessionManager(didFailWithError: error)
         return
       }
 
@@ -250,7 +240,7 @@ public final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSamp
       })
     default:
       let error = ImageScannerError.authorization
-      delegate?.captureSessionManager(self, didFailWithError: error)
+      delegate?.captureSessionManager(didFailWithError: error)
     }
   }
 
@@ -270,7 +260,7 @@ public final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSamp
       connection.isActive
     else {
       let error = ImageScannerError.capture
-      delegate?.captureSessionManager(self, didFailWithError: error)
+      delegate?.captureSessionManager(didFailWithError: error)
       return
     }
     
@@ -328,7 +318,7 @@ public final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSamp
       }
 
       let image = CIImage(cvImageBuffer: pixelBuffer)
-      delegate?.captureSessionManager(self, didReceiveImage: image)
+      delegate?.captureSessionManager(didReceiveImage: image)
     }
   }
 
@@ -366,7 +356,7 @@ public final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSamp
 
           // Remove the currently displayed rectangle as no rectangles are being found anymore
           strongSelf.displayedRectangleResult = nil
-          strongSelf.delegate?.captureSessionManager(strongSelf, didDetectQuad: nil, imageSize)
+          strongSelf.delegate?.captureSessionManager(didDetectQuad: nil, imageSize)
         }
       }
       return
@@ -388,7 +378,7 @@ public final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSamp
       }
 
       strongSelf.delegate?
-        .captureSessionManager(strongSelf, didDetectQuad: quad, result.imageSize)
+        .captureSessionManager(didDetectQuad: quad, result.imageSize)
     }
 
     return quad
@@ -418,7 +408,7 @@ extension CaptureSessionManager: AVCaptureMetadataOutputObjectsDelegate {
        let readableObject = metadataObject as? AVMetadataMachineReadableCodeObject,
        let stringValue = readableObject.stringValue {
       
-      delegate?.captureSessionManager(self, didCaptureQRCodeTextData: stringValue)
+      delegate?.captureSessionManager(didCaptureQRCodeTextData: stringValue)
     } else {
       shouldCaptureQR = true
     }
@@ -465,22 +455,22 @@ extension CaptureSessionManager: AVCapturePhotoCaptureDelegate {
     if let error = error.flatMap({ $0 as NSError }) {
       if error.code == -11803 {
         let _error = ImageScannerError.capture
-        delegate?.captureSessionManager(self, didFailWithError: _error)
+        delegate?.captureSessionManager(didFailWithError: _error)
       } else {
-        delegate?.captureSessionManager(self, didFailWithError: error)
+        delegate?.captureSessionManager(didFailWithError: error)
       }
       return
     }
 
     isDetecting = false
     rectangleFunnel.currentAutoScanPassCount = 0
-    delegate?.didStartCapturingPicture(for: self)
+    delegate?.didStartCapturingPicture()
 
     if let imageData = photo.fileDataRepresentation() {
       completeImageCapture(with: imageData)
     } else {
       let error = ImageScannerError.capture
-      delegate?.captureSessionManager(self, didFailWithError: error)
+      delegate?.captureSessionManager(didFailWithError: error)
       return
     }
   }
@@ -498,7 +488,6 @@ extension CaptureSessionManager: AVCapturePhotoCaptureDelegate {
               guard let strongSelf = self else { return }
               strongSelf.delegate?
                 .captureSessionManager(
-                  strongSelf,
                   didFailWithError: ImageScannerError.capture
                 )
             }
@@ -538,7 +527,6 @@ extension CaptureSessionManager: AVCapturePhotoCaptureDelegate {
             }
             strongSelf.delegate?
               .captureSessionManager(
-                strongSelf,
                 didCapturePicture: orientedImage,
                 withQuad: quad
               )
