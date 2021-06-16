@@ -113,7 +113,7 @@ public final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSamp
   public var shouldCaptureQR = true
   public var qrCodeScanningActive = false
   public let rectangleDetectionMode: RectangleDetectionMode
-
+  public let videoOutput = AVCaptureVideoDataOutput()
   // MARK: Life Cycle
 
   public init?(
@@ -132,7 +132,6 @@ public final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSamp
     DispatchQueue(label: "capture_session_setup").sync {
       self.captureSession.beginConfiguration()
 
-      let videoOutput = AVCaptureVideoDataOutput()
       videoOutput.alwaysDiscardsLateVideoFrames = true
 
       defer {
@@ -189,6 +188,7 @@ public final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSamp
   }
 
   deinit {
+    videoOutput.setSampleBufferDelegate(nil, queue: nil)
     videoPreviewLayer?.removeFromSuperlayer()
     videoPreviewLayer = nil
     captureSession.inputs.forEach { input in
@@ -270,7 +270,8 @@ public final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSamp
     photoSettings.isAutoStillImageStabilizationEnabled = true
     photoOutput.isHighResolutionCaptureEnabled = true
     photoOutput
-      .setPreparedPhotoSettingsArray([photoSettings]) { [weak photoOutput] success, error in
+      .setPreparedPhotoSettingsArray([photoSettings]) { [weak photoOutput, weak self] success, error in
+        guard let self = self else { return }
         if success {
           photoOutput?.capturePhoto(with: photoSettings, delegate: self)
         }
