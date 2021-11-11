@@ -310,7 +310,7 @@ public extension Quadrilateral {
           origin: .zero,
           size: imgSize
         )
-        .insetBy(dx: 80, dy: 80)
+        .insetBy(dx: 40, dy: 40)
       )
     } else {
       return Quadrilateral(
