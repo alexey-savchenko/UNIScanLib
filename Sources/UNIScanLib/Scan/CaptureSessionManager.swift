@@ -226,14 +226,14 @@ public final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSamp
     
     switch authorizationStatus {
     case .authorized:
-      DispatchQueue.main.async {
+      DispatchQueue.global(qos: .userInitiated).async {
         self.isRunning = true
         self.captureSession.startRunning()
       }
       isDetecting = true
     case .notDetermined:
       AVCaptureDevice.requestAccess(for: AVMediaType.video, completionHandler: { _ in
-        DispatchQueue.main.async { [weak self] in
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
           self?.start()
           self?.isRunning = true
         }
@@ -246,8 +246,11 @@ public final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSamp
 
   public func stop() {
     guard isRunning else { return }
-    captureSession.stopRunning()
-    isRunning = false
+    
+    DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+      self?.captureSession.stopRunning()
+      self?.isRunning = false
+    }
   }
 
   public func capturePhoto() {
